@@ -1,6 +1,6 @@
 using Zenject;
 
-namespace _Project.Logic.Infrastructure
+namespace _Project.Infrastructure
 {
     public class MainSceneInstaller : MonoInstaller
     {
