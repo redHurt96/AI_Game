@@ -6,7 +6,7 @@ namespace _Project.AI.Implementation
 {
     public class Actor : IActor
     {
-        private Queue<IActorAction> _behavior;
+        private IBehaviour _behavior;
 
         private List<IActorAction> _actions = new();
         private List<INeed> _needs = new();
@@ -14,16 +14,21 @@ namespace _Project.AI.Implementation
 
         public void Act()
         {
-            _behavior ??= SelectBehaviour();
-            _behavior.Peek().Execute();
+            if (_behavior == null || _behavior.Completed)
+                _behavior ??= SelectBehaviour();
 
-            if (_behavior.Peek().IsComplete)
-                _behavior.Dequeue();
+            _behavior.Execute();
         }
 
-        private Queue<IActorAction> SelectBehaviour()
+        private IBehaviour SelectBehaviour()
         {
-            INeed biggest = _needs.OrderByDescending(x => x.Value()).First();
+            INeed biggest = _needs.OrderByDescending(x => x.Amount()).First();
+            List<IBehaviourPath> possiblePaths = new();
+
+            while (possiblePaths.All(x => !x.CanAchieveGoal))
+            {
+
+            }
 
             return null;
         }
