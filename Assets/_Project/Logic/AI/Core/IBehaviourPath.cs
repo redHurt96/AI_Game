@@ -2,6 +2,7 @@
 {
     public interface IBehaviourPath
     {
-        bool CanAchieveGoal { get; set; }
+        bool CanAchieveGoal { get; }
+        IBehaviour GetBehaviour();
     }
 }
