@@ -7,17 +7,27 @@ namespace _Project.AI.Implementation
     {
         public bool Completed => _actions.Count == 0;
         
-        private readonly Queue<IActorAction> _actions;
+        private readonly Queue<IBehaviourAction> _actions;
 
-        public Behaviour(Queue<IActorAction> actions) => 
+        public Behaviour(Queue<IBehaviourAction> actions) => 
             _actions = actions;
 
-        public void Execute(IStatsArray forStats)
+        public void Execute(IStats forStats)
         {
-            _actions.Peek().Execute(forStats);
+            IBehaviourAction current = _actions.Peek();
+            
+            if (current is IEnterAction { IsStarted: false } enterAction)
+                enterAction.Enter(forStats);
+            
+            current.Execute(forStats);
 
-            if (_actions.Peek().IsComplete(forStats))
+            if (current.IsComplete(forStats))
+            {
+                if (current is IExitAction exitAction)
+                    exitAction.Exit(forStats);
+                
                 _actions.Dequeue();
+            }
         }
     }
 }

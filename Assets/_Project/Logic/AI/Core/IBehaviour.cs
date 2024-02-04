@@ -3,6 +3,6 @@
     public interface IBehaviour
     {
         bool Completed { get; }
-        void Execute(IStatsArray forStats);
+        void Execute(IStats forStats);
     }
 }

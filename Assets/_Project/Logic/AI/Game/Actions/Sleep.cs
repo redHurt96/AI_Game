@@ -1,18 +1,32 @@
 using _Project.AI.Core;
 using _Project.AI.Game.Stats;
-using UnityEngine;
+using static UnityEngine.Time;
 
 namespace _Project.AI.Game.Actions
 {
-    public class Sleep : IActorAction
+    public class Sleep : IBehaviourAction, IEnterAction, IExitAction
     {
-        public bool IsComplete(IStatsArray forStats) => 
-            forStats.Get<Energy>().Value > 90f;
+        public bool IsStarted { get; private set; }
 
-        public void Execute(IStatsArray forStats)
+        public bool IsComplete(IStats withStats) => 
+            withStats.Get<Energy>().Value > 90f;
+
+        public void Execute(IStats forStats) => 
+            forStats.Get<Energy>().Value += deltaTime * 10;
+
+        public void ApplyFull(IStats final) => 
+            final.Get<Energy>().Value = 100;
+
+        public void Enter(IStats withStats)
         {
-            forStats.Get<Energy>().Value += Time.deltaTime * 10;
-            forStats.Get<Fullness>().Value -= Time.deltaTime * 9;
+            IsStarted = true;
+            withStats.Get<AwakeState>().Value = true;
+        }
+
+        public void Exit(IStats withStats)
+        {
+            withStats.Get<AwakeState>().Value = false;
+            IsStarted = false;
         }
     }
 }
