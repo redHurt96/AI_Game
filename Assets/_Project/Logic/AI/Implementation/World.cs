@@ -4,7 +4,7 @@ using _Project.AI.Core;
 
 namespace _Project.AI.Implementation
 {
-    internal class World : IWorld
+    public class World : IWorld
     {
         public IWorldContext Context { get; }
 
@@ -20,7 +20,7 @@ namespace _Project.AI.Implementation
 
         public void Tick(float delta)
         {
-            _systems.ForEach(x => x.Tick(this));
+            _systems.ForEach(x => x.Tick(Context));
             _actors.ForEach(x => x.Act(delta));
         }
 

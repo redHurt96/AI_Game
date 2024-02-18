@@ -8,10 +8,11 @@ namespace _Project.Game.Actions
     {
         public override event Action OnComplete;
 
-        protected override bool CanApplyAction(NpcContext context, WorldContext world) => 
-            world.Foods.Any;
+        protected override bool CanApply(NpcContext context, WorldContext world) => 
+            world.Foods.Any
+            && context.IsAwake;
 
-        protected override async void RunAction(NpcContext context, WorldContext world)
+        protected override async void Apply(NpcContext context, WorldContext world)
         {
             await UniTask.WaitUntil(() => world.Foods.Any);
             
@@ -19,10 +20,10 @@ namespace _Project.Game.Actions
             OnComplete?.Invoke();
         }
 
-        protected override float ApplyActionInstant(NpcContext context, WorldContext world)
-        {
+        protected override float GetApplyTime(NpcContext context, WorldContext world) => 
+            0f;
+
+        protected override void ApplyResult(NpcContext context, WorldContext world) => 
             context.TargetFood = world.Foods.GetClosest(context.Position);
-            return 0f;
-        }
     }
 }

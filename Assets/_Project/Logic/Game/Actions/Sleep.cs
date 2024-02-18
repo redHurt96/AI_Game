@@ -2,7 +2,8 @@ using System;
 using _Project.Game.Domain;
 using Cysharp.Threading.Tasks;
 using RH_Modules.Utilities.Extensions;
-using UnityEngine;
+using static UnityEngine.Mathf;
+using static UnityEngine.Time;
 
 namespace _Project.Game.Actions
 {
@@ -10,15 +11,22 @@ namespace _Project.Game.Actions
     {
         public override event Action OnComplete;
         
-        protected override bool CanApplyAction(NpcContext context, WorldContext world) => 
-            !context.Energy.ApproximatelyEqual(1f);
+        protected override bool CanApply(NpcContext context, WorldContext world) => 
+            !context.Energy.ApproximatelyEqual(1f)
+            && context.IsAwake;
 
-        protected override async void RunAction(NpcContext context, WorldContext world)
+        protected override void StartApply(NpcContext context, WorldContext world)
+        {
+            base.StartApply(context, world);
+            context.IsAwake = false;
+        }
+
+        protected override async void Apply(NpcContext context, WorldContext world)
         {
             while (!context.FoodEnergy.ApproximatelyEqual(1f) && context.TargetFood.IsExist)
             {
-                float delta = context.SleepSpeed * Time.deltaTime;
-                context.Energy = Mathf.Min(context.Energy + delta, 1f);
+                float delta = context.SleepSpeed * deltaTime;
+                context.Energy = Min(context.Energy + delta, 1f);
 
                 await UniTask.Yield();
             }
@@ -26,9 +34,18 @@ namespace _Project.Game.Actions
             OnComplete?.Invoke();
         }
 
-        protected override float ApplyActionInstant(NpcContext context, WorldContext world)
+        protected override float GetApplyTime(NpcContext context, WorldContext world)
         {
-            throw new NotImplementedException();
+            float delta = 1f - context.Energy;
+            float time = delta / context.SleepSpeed;
+
+            return time;
+        }
+
+        protected override void ApplyResult(NpcContext context, WorldContext world)
+        {
+            context.Energy = 1f;
+            context.IsAwake = true;
         }
     }
 }

@@ -9,16 +9,24 @@ namespace _Project.AI.Core
         public abstract event Action OnComplete;
         
         public bool CanApply(IActorContext context, IWorldContext world) =>  
-            CanApplyAction((TContext)context, (TWorld)world);
+            CanApply((TContext)context, (TWorld)world);
 
-        public void Run(IActorContext context, IWorldContext world) => 
-            RunAction((TContext)context, (TWorld)world);
+        public void Apply(IActorContext context, IWorldContext world) => 
+            Apply((TContext)context, (TWorld)world);
 
-        public float ApplyInstant(IActorContext context, IWorldContext world) => 
-            ApplyActionInstant( (TContext)context, (TWorld)world);
+        public void StartApply(IActorContext context, IWorldContext world) => 
+            StartApply((TContext)context, (TWorld)world);
 
-        protected abstract bool CanApplyAction(TContext context, TWorld world);
-        protected abstract void RunAction(TContext context, TWorld world);
-        protected abstract float ApplyActionInstant(TContext context, TWorld world);
+        public float GetApplyTime(IActorContext context, IWorldContext world) => 
+            GetApplyTime((TContext)context, (TWorld)world);
+
+        public void ApplyResult(IActorContext context, IWorldContext world) => 
+            ApplyResult( (TContext)context, (TWorld)world);
+
+        protected abstract bool CanApply(TContext context, TWorld world);
+        protected virtual void StartApply(TContext context, TWorld world) {}
+        protected abstract void Apply(TContext context, TWorld world);
+        protected abstract float GetApplyTime(TContext context, TWorld world);
+        protected abstract void ApplyResult(TContext context, TWorld world);
     }
 }

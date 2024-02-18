@@ -3,10 +3,11 @@ using _Project.AI.Core;
 
 namespace _Project.AI.Implementation
 {
-    internal partial class Actor
+    public partial class Actor
     {
         private readonly struct PossibleBehavior
         {
+            public bool HasActions => Actions is { Count: > 0 };
             public bool CanAccomplishNeed => _need.IsAccomplished(Context, World);
 
             public readonly Queue<IAction> Actions;

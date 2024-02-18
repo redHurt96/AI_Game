@@ -1,3 +1,4 @@
+using _Project.Game.Extensions;
 using UnityEngine;
 
 namespace _Project.Game.Domain
@@ -14,5 +15,8 @@ namespace _Project.Game.Domain
             Position = fromOrigin.Position;
             FoodEnergy = fromOrigin.FoodEnergy;
         }
+
+        public override string ToString() =>
+            this.GetFieldsDescription();
     }
 }

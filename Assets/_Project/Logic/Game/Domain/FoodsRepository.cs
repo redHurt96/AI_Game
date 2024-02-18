@@ -23,6 +23,9 @@ namespace _Project.Game.Domain
                 .OrderBy(x => Vector3.Distance(x.Position, to))
                 .First();
 
+        public void Add(Food food) => 
+            _foods.Add(food);
+
         public void Remove(Food food) => 
             _foods.Remove(food);
     }

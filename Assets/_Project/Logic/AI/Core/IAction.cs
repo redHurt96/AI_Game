@@ -6,7 +6,9 @@ namespace _Project.AI.Core
     {
         event Action OnComplete;
         bool CanApply(IActorContext context, IWorldContext world);
-        void Run(IActorContext context, IWorldContext world);
-        float ApplyInstant(IActorContext context, IWorldContext world);
+        void Apply(IActorContext context, IWorldContext world);
+        void StartApply(IActorContext context, IWorldContext world);
+        float GetApplyTime(IActorContext context, IWorldContext world);
+        void ApplyResult(IActorContext context, IWorldContext world);
     }
 }

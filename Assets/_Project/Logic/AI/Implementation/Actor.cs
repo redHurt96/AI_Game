@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using _Project.AI.Core;
 using _Project.AI.Extensions;
+using UnityEngine;
 
 namespace _Project.AI.Implementation
 {
-    internal partial class Actor : IActor
+    public partial class Actor : IActor
     {
         private Queue<IAction> _behavior = new();
         
@@ -15,7 +17,7 @@ namespace _Project.AI.Implementation
         private readonly IWorldContext _world;
         private readonly IActorContext _context;
 
-        internal Actor(
+        public Actor(
             List<IAction> actions, 
             List<IPassiveAction> passiveActions, 
             List<INeed> needs, 
@@ -37,30 +39,42 @@ namespace _Project.AI.Implementation
                     x.Apply(_context, _world, delta);
             });
 
-            if (_behavior.Count == 0)
+            if (_behavior is { Count: > 0 })
+                return;
+            
+            if (_behavior == null || _behavior.Count == 0)
                 _behavior = CreateBehavior();
 
-            RunCurrentAction();
+            if (_behavior is { Count: > 0 })
+            {
+                LogBehavior();
+                RunCurrentAction();
+            }
         }
 
         private void RunCurrentAction()
         {
-            _behavior.Peek().Run(_context, _world);
-            _behavior.Peek().OnComplete += RunNextAction;
+            IAction action = _behavior.Peek();
+            action.StartApply(_context, _world);
+            action.OnComplete += RunNextAction;
+            action.Apply(_context, _world);
         }
 
         private void RunNextAction()
         {
-            _behavior.Peek().OnComplete -= RunNextAction;
+            IAction action = _behavior.Peek();
+            action.ApplyResult(_context, _world);
+            action.OnComplete -= RunNextAction;
             _behavior.Dequeue();
             
-            RunCurrentAction();
+            if (_behavior.Count > 0)
+                RunCurrentAction();
         }
 
         private Queue<IAction> CreateBehavior()
         {
             INeed biggestNeed = _needs
-                .OrderBy(x => x.Amount(_context, _world))
+                .OrderByDescending(x => x.Amount(_context, _world))
                 .First();
 
             List<PossibleBehavior> possibleBehaviors = new()
@@ -68,7 +82,9 @@ namespace _Project.AI.Implementation
                 new(biggestNeed, _context, _world),
             };
 
-            while (possibleBehaviors.All(x => !x.CanAccomplishNeed))
+            int iterationsCount = 0;
+            while (possibleBehaviors.All(x => !x.CanAccomplishNeed && x.Actions.Count <= _actions.Count)
+                   && iterationsCount <= _actions.Count)
             {
                 foreach (PossibleBehavior behavior in possibleBehaviors.ToArray())
                 {
@@ -80,7 +96,10 @@ namespace _Project.AI.Implementation
                         {
                             IActorContext context = behavior.Context.Copy();
                             IWorldContext world = behavior.World.Copy();
-                            float applyTime = action.ApplyInstant(context, world);
+                            
+                            action.StartApply(context, world);
+                            
+                            float applyTime = action.GetApplyTime(context, world);
                             
                             _passiveActions.ForEach(x =>
                             {
@@ -88,22 +107,41 @@ namespace _Project.AI.Implementation
                                     x.Apply(context, world, applyTime);
                             });
                             
+                            action.ApplyResult(context, world);
+                            
                             Queue<IAction> actionsQueue = new();
                             behavior.Actions.ForEach(x => actionsQueue.Enqueue(x));
                             actionsQueue.Enqueue(action);
-
                             possibleBehaviors.Add(new(biggestNeed, context, world, actionsQueue));
                         }
                     }
+
                 }
+                
+                iterationsCount++;
             }
 
-            return possibleBehaviors
-                .Find(x => x.CanAccomplishNeed)
-                .Actions;
+            PossibleBehavior possibleBehavior = possibleBehaviors
+                .Find(x => x.CanAccomplishNeed);
+
+            if (possibleBehavior.HasActions)
+                return possibleBehavior.Actions;
+            
+            return null;
         }
 
         public IActor Copy() => 
             new Actor(_actions, _passiveActions, _needs, _world.Copy(), _context.Copy());
+
+        private void LogBehavior() =>
+            Debug.Log(new StringBuilder()
+                .AppendLine("New behavior")
+                .AppendLine(string.Empty)
+                .AppendJoin("\n", _behavior.Select(x => $"{x.GetType().Name}"))
+                .AppendLine(string.Empty)
+                .AppendLine(_context.ToString())
+                .AppendLine(string.Empty)
+                .AppendLine(_world.ToString())
+                .ToString());
     }
 }
