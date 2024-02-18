@@ -6,7 +6,8 @@ namespace _Project.Infrastructure
     {
         public override void InstallBindings()
         {
-            Container.BindInterfacesAndSelfTo<EntryPoint>().AsSingle();
+            Container.BindInterfacesAndSelfTo<SystemsHandler>().AsSingle();
+            Container.BindInterfacesAndSelfTo<EntryPoint>().AsSingle().NonLazy();
         }
     }
 }
