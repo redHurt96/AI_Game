@@ -11,8 +11,8 @@ namespace _Project.Game.PassiveActions
 
         protected override void ApplyAction(NpcContext context, IWorldContext world, float delta)
         {
-            float result = Min(context.SpendFoodEnergySpeed * delta, context.FoodEnergy);
-            context.FoodEnergy -= result;
+            float result = Min(context.SpendFoodEnergySpeed * delta, context.FoodEnergy.Value);
+            context.FoodEnergy.Value -= result;
         }
     }
 }

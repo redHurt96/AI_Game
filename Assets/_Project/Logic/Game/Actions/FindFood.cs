@@ -16,7 +16,7 @@ namespace _Project.Game.Actions
         {
             await UniTask.WaitUntil(() => world.Foods.Any);
             
-            context.TargetFood = world.Foods.GetClosest(context.Position);
+            context.TargetFood = world.Foods.GetClosest(context.Position.Value);
             OnComplete?.Invoke();
         }
 
@@ -24,6 +24,6 @@ namespace _Project.Game.Actions
             0f;
 
         protected override void ApplyResult(NpcContext context, WorldContext world) => 
-            context.TargetFood = world.Foods.GetClosest(context.Position);
+            context.TargetFood = world.Foods.GetClosest(context.Position.Value);
     }
 }

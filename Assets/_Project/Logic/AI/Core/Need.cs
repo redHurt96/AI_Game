@@ -4,13 +4,17 @@ namespace _Project.AI.Core
         where TContext : IActorContext
         where TWorld : IWorldContext
     {
+        public bool ShouldWorriedAbout(IActorContext context, IWorldContext world) => 
+            ShouldWorriedAbout((TContext)context, (TWorld)world);
+
         public float Amount(IActorContext context, IWorldContext world) => 
-            GetAmount((TContext)context, (TWorld)world);
+            Amount((TContext)context, (TWorld)world);
 
         public bool IsAccomplished(IActorContext context, IWorldContext world) => 
             IsNeedAccomplished((TContext)context, (TWorld)world);
 
-        protected abstract float GetAmount(TContext context, TWorld world);
+        protected abstract bool ShouldWorriedAbout(TContext context, TWorld world);
+        protected abstract float Amount(TContext context, TWorld world);
         protected abstract bool IsNeedAccomplished(TContext context, TWorld world);
     }
 }

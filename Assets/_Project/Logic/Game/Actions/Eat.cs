@@ -12,8 +12,8 @@ namespace _Project.Game.Actions
         public override event Action OnComplete;
         
         protected override bool CanApply(NpcContext context, WorldContext world) => 
-            context.HasTargetFood 
-            && !context.FoodEnergy.ApproximatelyEqual(1f)
+            context.CloseEnoughToFood 
+            && !context.FoodEnergy.Value.ApproximatelyEqual(1f)
             && context.IsAwake;
 
         protected override void StartApply(NpcContext context, WorldContext world)
@@ -24,11 +24,11 @@ namespace _Project.Game.Actions
 
         protected override async void Apply(NpcContext context, WorldContext world)
         {
-            while (!context.FoodEnergy.ApproximatelyEqual(1f) && context.TargetFood.IsExist)
+            while (!context.FoodEnergy.Value.ApproximatelyEqual(1f) && context.HasTargetFood)
             {
                 float delta = context.EatSpeed * deltaTime;
-                context.FoodEnergy = Min(context.FoodEnergy + delta, 1f);
-                context.TargetFood.FoodEnergy = Max(context.TargetFood.FoodEnergy - delta, 0f);
+                context.FoodEnergy.Value = Min(context.FoodEnergy.Value + delta, 1f);
+                context.TargetFood.FoodEnergy.Value = Max(context.TargetFood.FoodEnergy.Value - delta, 0f);
 
                 await UniTask.Yield();
             }
@@ -49,8 +49,8 @@ namespace _Project.Game.Actions
         {
             float delta = CalculateDelta(context);
 
-            context.FoodEnergy += delta;
-            context.TargetFood.FoodEnergy -= delta;
+            context.FoodEnergy.Value += delta;
+            context.TargetFood.FoodEnergy.Value -= delta;
             context.IsEat = false;
             
             RemoveFood(context, world);
@@ -58,13 +58,14 @@ namespace _Project.Game.Actions
 
         private static void RemoveFood(NpcContext context, WorldContext world)
         {
+            context.TargetFood.Destroy();
             world.Foods.Remove(context.TargetFood);
             context.TargetFood = default;
         }
 
         private static float CalculateDelta(NpcContext context)
         {
-            float delta = Min(context.TargetFood.FoodEnergy, 1f - context.FoodEnergy);
+            float delta = Min(context.TargetFood.FoodEnergy.Value, 1f - context.FoodEnergy.Value);
             return delta;
         }
     }

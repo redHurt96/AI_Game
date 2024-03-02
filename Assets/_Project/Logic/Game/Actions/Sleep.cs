@@ -12,7 +12,7 @@ namespace _Project.Game.Actions
         public override event Action OnComplete;
         
         protected override bool CanApply(NpcContext context, WorldContext world) => 
-            !context.Energy.ApproximatelyEqual(1f)
+            !context.Energy.Value.ApproximatelyEqual(1f)
             && context.IsAwake;
 
         protected override void StartApply(NpcContext context, WorldContext world)
@@ -23,10 +23,10 @@ namespace _Project.Game.Actions
 
         protected override async void Apply(NpcContext context, WorldContext world)
         {
-            while (!context.FoodEnergy.ApproximatelyEqual(1f) && context.TargetFood.IsExist)
+            while (!context.FoodEnergy.Value.ApproximatelyEqual(1f) && context.HasTargetFood)
             {
                 float delta = context.SleepSpeed * deltaTime;
-                context.Energy = Min(context.Energy + delta, 1f);
+                context.Energy.Value = Min(context.Energy.Value + delta, 1f);
 
                 await UniTask.Yield();
             }
@@ -36,7 +36,7 @@ namespace _Project.Game.Actions
 
         protected override float GetApplyTime(NpcContext context, WorldContext world)
         {
-            float delta = 1f - context.Energy;
+            float delta = 1f - context.Energy.Value;
             float time = delta / context.SleepSpeed;
 
             return time;
@@ -44,7 +44,7 @@ namespace _Project.Game.Actions
 
         protected override void ApplyResult(NpcContext context, WorldContext world)
         {
-            context.Energy = 1f;
+            context.Energy.Value = 1f;
             context.IsAwake = true;
         }
     }

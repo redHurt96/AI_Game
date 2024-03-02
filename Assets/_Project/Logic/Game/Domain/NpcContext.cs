@@ -1,19 +1,25 @@
 using _Project.AI.Core;
 using _Project.Game.Extensions;
+using UniRx;
 using UnityEngine;
+using static UnityEngine.Vector3;
 
 namespace _Project.Game.Domain
 {
     public class NpcContext : IActorContext
     {
-        public bool HasTargetFood => TargetFood.IsExist;
+        public bool HasTargetFood => TargetFood != null;
+        public float DistanceToFood => Distance(Position.Value, TargetFood.Position);
+        public bool CloseEnoughToFood => HasTargetFood && DistanceToFood < MoveStoppingDistance;
 
         public bool IsAwake;
         public bool IsEat;
-        public float FoodEnergy;
-        public float Energy;
-        public Vector3 Position;
-        
+        public readonly ReactiveProperty<float> FoodEnergy;
+        public readonly ReactiveProperty<float> Energy;
+        public readonly ReactiveProperty<Vector3> Position;
+
+        public readonly float MoveStoppingDistance = .5f;
+        public readonly float MoveSpeed = 1f;
         public readonly float EatSpeed = .5f;
         public readonly float SleepSpeed = .5f;
         public readonly float SpendEnergySpeed = .1f;
@@ -25,9 +31,9 @@ namespace _Project.Game.Domain
         {
             IsAwake = isAwake;
             IsEat = isEat;
-            FoodEnergy = foodEnergy;
-            Energy = energy;
-            Position = position;
+            FoodEnergy = new(foodEnergy);
+            Energy = new(energy);
+            Position = new(position);
         }
 
         private NpcContext(NpcContext origin)

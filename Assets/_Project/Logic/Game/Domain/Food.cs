@@ -1,22 +1,31 @@
+using System;
 using _Project.Game.Extensions;
+using UniRx;
 using UnityEngine;
 
 namespace _Project.Game.Domain
 {
-    public struct Food
+    public class Food
     {
-        public bool IsExist => FoodEnergy > 0;
         public Vector3 Position;
 
-        public float FoodEnergy;
-        
-        public Food(Food fromOrigin)
+        public event Action Destroyed;
+        public readonly ReactiveProperty<float> FoodEnergy;
+
+        public Food(float energy, Vector3 position)
         {
-            Position = fromOrigin.Position;
-            FoodEnergy = fromOrigin.FoodEnergy;
+            Position = position;
+            FoodEnergy = new(energy);
+        }
+        
+        public Food(Food fromOrigin) : this(fromOrigin.FoodEnergy.Value, fromOrigin.Position)
+        {
         }
 
         public override string ToString() =>
             this.GetFieldsDescription();
+
+        public void Destroy() => 
+            Destroyed?.Invoke();
     }
 }

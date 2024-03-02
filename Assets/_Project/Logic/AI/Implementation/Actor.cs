@@ -4,6 +4,7 @@ using System.Text;
 using _Project.AI.Core;
 using _Project.AI.Extensions;
 using UnityEngine;
+using static System.String;
 
 namespace _Project.AI.Implementation
 {
@@ -73,13 +74,17 @@ namespace _Project.AI.Implementation
 
         private Queue<IAction> CreateBehavior()
         {
-            INeed biggestNeed = _needs
-                .OrderByDescending(x => x.Amount(_context, _world))
-                .First();
+            IOrderedEnumerable<INeed> needs = _needs
+                .Where(x => x.ShouldWorriedAbout(_context, _world))
+                .OrderByDescending(x => x.Amount(_context, _world));
 
+            if (!needs.Any())
+                return null;
+
+            INeed biggestNeed = needs.First();
             List<PossibleBehavior> possibleBehaviors = new()
             {
-                new(biggestNeed, _context, _world),
+                new(biggestNeed, _context.Copy(), _world.Copy()),
             };
 
             int iterationsCount = 0;
@@ -108,7 +113,6 @@ namespace _Project.AI.Implementation
                             });
                             
                             action.ApplyResult(context, world);
-                            
                             Queue<IAction> actionsQueue = new();
                             behavior.Actions.ForEach(x => actionsQueue.Enqueue(x));
                             actionsQueue.Enqueue(action);
@@ -136,11 +140,11 @@ namespace _Project.AI.Implementation
         private void LogBehavior() =>
             Debug.Log(new StringBuilder()
                 .AppendLine("New behavior")
-                .AppendLine(string.Empty)
+                .AppendLine(Empty)
                 .AppendJoin("\n", _behavior.Select(x => $"{x.GetType().Name}"))
-                .AppendLine(string.Empty)
+                .AppendLine(Empty)
                 .AppendLine(_context.ToString())
-                .AppendLine(string.Empty)
+                .AppendLine(Empty)
                 .AppendLine(_world.ToString())
                 .ToString());
     }

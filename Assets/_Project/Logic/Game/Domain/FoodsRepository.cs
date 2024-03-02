@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,6 +7,8 @@ namespace _Project.Game.Domain
 {
     public class FoodsRepository
     {
+        public readonly Guid ID = Guid.NewGuid();
+        
         public bool Any => _foods.Any();
         
         private readonly List<Food> _foods;

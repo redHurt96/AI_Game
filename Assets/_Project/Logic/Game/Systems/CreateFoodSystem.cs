@@ -1,11 +1,16 @@
-using _Project.AI.Core;
 using _Project.Game.Domain;
+using Zenject;
 
 namespace _Project.Game.Systems
 {
-    public class CreateFoodSystem : WorldSystem<WorldContext>
+    public class CreateFoodSystem : ITickable
     {
-        protected override void Tick(WorldContext world) => 
-            world.FoodSpawner.Accumulate();
+        private readonly WorldContext _world;
+
+        public CreateFoodSystem(WorldContext world) => 
+            _world = world;
+
+        public void Tick() => 
+            _world.FoodSpawner.Accumulate();
     }
 }

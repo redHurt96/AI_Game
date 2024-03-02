@@ -1,5 +1,8 @@
+using _Project.Presentation;
 using RH_Modules.Utilities.Extensions;
 using UnityEngine;
+using static UnityEngine.Random;
+using static UnityEngine.Time;
 
 namespace _Project.Game.Domain
 {
@@ -16,21 +19,24 @@ namespace _Project.Game.Domain
 
         public void Accumulate()
         {
-            _progress = Mathf.Min(_progress + _speed * Time.deltaTime, 1f);
+            _progress = Mathf.Min(_progress + _speed * deltaTime, 1f);
 
             if (_progress.ApproximatelyEqual(1f))
             {
-                _foodsRepository.Add(new()
-                {
-                    FoodEnergy = 1f,
-                    Position = new(Random.Range(-10, 10), 0f, Random.Range(-10, 10)),
-                });
+                CreateFood();
                 _progress = 0f;
             }
         }
 
+        private void CreateFood()
+        {
+            Food food = new(1f, new(Range(-10, 10), 0f, Range(-10, 10)));
+            Object.Instantiate(Resources.Load<FoodView>("Food")).Setup(food);
+            _foodsRepository.Add(food);
+        }
+
         public FoodSpawner Copy(FoodsRepository foodsRepository) =>
-            new(foodsRepository)
+            new(foodsRepository.Copy())
             {
                 _progress = _progress,
             };
