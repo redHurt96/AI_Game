@@ -18,7 +18,7 @@ namespace _Project.Game.Domain
 
         public FoodsRepository Copy() =>
             new(_foods
-                .Select(x => new Food(x))
+                .Select(x => x.Copy())
                 .ToList());
 
         public Food GetClosest(Vector3 to) =>

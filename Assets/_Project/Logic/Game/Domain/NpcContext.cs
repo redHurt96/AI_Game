@@ -10,27 +10,29 @@ namespace _Project.Game.Domain
     {
         public bool HasTargetFood => TargetFood != null;
         public float DistanceToFood => Distance(Position.Value, TargetFood.Position);
-        public bool CloseEnoughToFood => HasTargetFood && DistanceToFood < MoveStoppingDistance;
+        public bool CloseEnoughToFood => HasTargetFood && DistanceToFood < MoveStoppingDistance + .1f;
 
-        public bool IsAwake;
-        public bool IsEat;
+        public bool IsEat { get; set; }
+        public bool IsAwake { get; set; }
+        public float ChillTimer { get; set; }
+
+        public readonly FoodsRepository WorldFood;
         public readonly ReactiveProperty<float> FoodEnergy;
         public readonly ReactiveProperty<float> Energy;
         public readonly ReactiveProperty<Vector3> Position;
 
         public readonly float MoveStoppingDistance = .5f;
-        public readonly float MoveSpeed = 1f;
+        public readonly float MoveSpeed = 5f;
         public readonly float EatSpeed = .5f;
         public readonly float SleepSpeed = .5f;
-        public readonly float SpendEnergySpeed = .1f;
-        public readonly float SpendFoodEnergySpeed = .1f;
+        public readonly float SpendEnergySpeed = .05f;
+        public readonly float SpendFoodEnergySpeed = .05f;
 
         public Food TargetFood;
 
-        public NpcContext(bool isAwake, bool isEat, float foodEnergy, float energy, Vector3 position)
+        public NpcContext(float foodEnergy, float energy, Vector3 position, FoodsRepository worldFood)
         {
-            IsAwake = isAwake;
-            IsEat = isEat;
+            WorldFood = worldFood;
             FoodEnergy = new(foodEnergy);
             Energy = new(energy);
             Position = new(position);
@@ -38,12 +40,11 @@ namespace _Project.Game.Domain
 
         private NpcContext(NpcContext origin)
         {
-            IsEat = origin.IsEat;
-            IsAwake = origin.IsAwake;
+            WorldFood = origin.WorldFood.Copy();
             FoodEnergy = origin.FoodEnergy;
             Energy = origin.Energy;
             Position = origin.Position;
-            TargetFood = origin.TargetFood;
+            TargetFood = origin.TargetFood?.Copy();
         }
 
         public IActorContext Copy() =>

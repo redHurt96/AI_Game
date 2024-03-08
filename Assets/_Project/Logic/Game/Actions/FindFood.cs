@@ -1,29 +1,14 @@
-using System;
+using _Project.AI.Core;
 using _Project.Game.Domain;
-using Cysharp.Threading.Tasks;
 
 namespace _Project.Game.Actions
 {
-    public class FindFood : AI.Core.Action<NpcContext, WorldContext>
+    public class FindFood : IAction<NpcContext>
     {
-        public override event Action OnComplete;
+        public bool CanApply(NpcContext context) => 
+            context.WorldFood.Any && !context.HasTargetFood;
 
-        protected override bool CanApply(NpcContext context, WorldContext world) => 
-            world.Foods.Any
-            && context.IsAwake;
-
-        protected override async void Apply(NpcContext context, WorldContext world)
-        {
-            await UniTask.WaitUntil(() => world.Foods.Any);
-            
-            context.TargetFood = world.Foods.GetClosest(context.Position.Value);
-            OnComplete?.Invoke();
-        }
-
-        protected override float GetApplyTime(NpcContext context, WorldContext world) => 
-            0f;
-
-        protected override void ApplyResult(NpcContext context, WorldContext world) => 
-            context.TargetFood = world.Foods.GetClosest(context.Position.Value);
+        public void ApplyResult(NpcContext context) => 
+            context.TargetFood = context.WorldFood.GetClosest(context.Position.Value);
     }
 }

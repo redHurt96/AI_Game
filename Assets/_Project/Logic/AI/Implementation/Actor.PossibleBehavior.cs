@@ -3,33 +3,30 @@ using _Project.AI.Core;
 
 namespace _Project.AI.Implementation
 {
-    public partial class Actor
+    public partial class Actor<TContext> where TContext : IActorContext
     {
         private readonly struct PossibleBehavior
         {
             public bool HasActions => Actions is { Count: > 0 };
-            public bool CanAccomplishNeed => _need.IsAccomplished(Context, World);
+            public bool CanAccomplishNeed => _need.IsAccomplished(Context);
 
-            public readonly Queue<IAction> Actions;
-            public readonly IActorContext Context;
-            public readonly IWorldContext World;
+            public readonly Queue<IAction<TContext>> Actions;
+            public readonly TContext Context;
             
-            private readonly INeed _need;
+            private readonly INeed<TContext> _need;
 
-            public PossibleBehavior(INeed need, IActorContext context, IWorldContext world)
+            public PossibleBehavior(INeed<TContext> need, TContext context)
             {
                 _need = need;
                 Context = context;
-                World = world;
                 Actions = new();
             }
 
             public PossibleBehavior(
-                INeed need, 
-                IActorContext context, 
-                IWorldContext world, 
-                Queue<IAction> actions)
-                : this(need, context, world) =>
+                INeed<TContext> need, 
+                TContext context,
+                Queue<IAction<TContext>> actions)
+                : this(need, context) =>
                 Actions = actions;
         }
     }

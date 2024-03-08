@@ -1,23 +1,22 @@
 using _Project.Presentation;
 using RH_Modules.Utilities.Extensions;
 using UnityEngine;
+using Zenject;
 using static UnityEngine.Random;
 using static UnityEngine.Time;
 
 namespace _Project.Game.Domain
 {
-    public class FoodSpawner
+    public class FoodSpawner : ITickable
     {
         private readonly FoodsRepository _foodsRepository;
         private float _progress;
         private readonly float _speed = 1f;
 
-        public FoodSpawner(FoodsRepository foodsRepository)
-        {
+        public FoodSpawner(FoodsRepository foodsRepository) => 
             _foodsRepository = foodsRepository;
-        }
 
-        public void Accumulate()
+        public void Tick()
         {
             _progress = Mathf.Min(_progress + _speed * deltaTime, 1f);
 
@@ -30,15 +29,9 @@ namespace _Project.Game.Domain
 
         private void CreateFood()
         {
-            Food food = new(1f, new(Range(-10, 10), 0f, Range(-10, 10)));
+            Food food = new(new(Range(-10, 10), 0f, Range(-10, 10)));
             Object.Instantiate(Resources.Load<FoodView>("Food")).Setup(food);
             _foodsRepository.Add(food);
         }
-
-        public FoodSpawner Copy(FoodsRepository foodsRepository) =>
-            new(foodsRepository.Copy())
-            {
-                _progress = _progress,
-            };
     }
 }

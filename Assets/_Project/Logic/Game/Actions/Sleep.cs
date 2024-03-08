@@ -1,48 +1,28 @@
-using System;
+using _Project.AI.Core;
 using _Project.Game.Domain;
-using Cysharp.Threading.Tasks;
 using RH_Modules.Utilities.Extensions;
 using static UnityEngine.Mathf;
 using static UnityEngine.Time;
 
 namespace _Project.Game.Actions
 {
-    public class Sleep : AI.Core.Action<NpcContext, WorldContext>
+    public class Sleep : IAction<NpcContext>, ILongAction<NpcContext>
     {
-        public override event Action OnComplete;
-        
-        protected override bool CanApply(NpcContext context, WorldContext world) => 
+        public bool CanApply(NpcContext context) =>
             !context.Energy.Value.ApproximatelyEqual(1f)
             && context.IsAwake;
 
-        protected override void StartApply(NpcContext context, WorldContext world)
+        public bool IsComplete(NpcContext context) => 
+            context.Energy.Value.ApproximatelyEqual(1f);
+
+        public void Execute(NpcContext context)
         {
-            base.StartApply(context, world);
-            context.IsAwake = false;
+            context.IsAwake = true;
+            float delta = context.SleepSpeed * deltaTime;
+            context.Energy.Value = Min(context.Energy.Value + delta, 1f);
         }
 
-        protected override async void Apply(NpcContext context, WorldContext world)
-        {
-            while (!context.FoodEnergy.Value.ApproximatelyEqual(1f) && context.HasTargetFood)
-            {
-                float delta = context.SleepSpeed * deltaTime;
-                context.Energy.Value = Min(context.Energy.Value + delta, 1f);
-
-                await UniTask.Yield();
-            }
-            
-            OnComplete?.Invoke();
-        }
-
-        protected override float GetApplyTime(NpcContext context, WorldContext world)
-        {
-            float delta = 1f - context.Energy.Value;
-            float time = delta / context.SleepSpeed;
-
-            return time;
-        }
-
-        protected override void ApplyResult(NpcContext context, WorldContext world)
+        public void ApplyResult(NpcContext context)
         {
             context.Energy.Value = 1f;
             context.IsAwake = true;

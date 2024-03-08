@@ -8,27 +8,24 @@ using static System.String;
 
 namespace _Project.AI.Implementation
 {
-    public partial class Actor : IActor
+    public partial class Actor<TContext> : IActor where TContext : IActorContext
     {
-        private Queue<IAction> _behavior = new();
+        private Queue<IAction<TContext>> _behavior = new();
         
-        private readonly List<IAction> _actions;
-        private readonly List<IPassiveAction> _passiveActions;
-        private readonly List<INeed> _needs;
-        private readonly IWorldContext _world;
-        private readonly IActorContext _context;
+        private readonly List<IAction<TContext>> _actions;
+        private readonly List<IPassiveAction<TContext>> _passiveActions;
+        private readonly List<INeed<TContext>> _needs;
+        private readonly TContext _context;
 
         public Actor(
-            List<IAction> actions, 
-            List<IPassiveAction> passiveActions, 
-            List<INeed> needs, 
-            IWorldContext world,
-            IActorContext actorContext)
+            List<IAction<TContext>> actions, 
+            List<IPassiveAction<TContext>> passiveActions, 
+            List<INeed<TContext>> needs,
+            TContext actorContext)
         {
             _actions = actions;
             _passiveActions = passiveActions;
             _needs = needs;
-            _world = world;
             _context = actorContext;
         }
 
@@ -36,12 +33,15 @@ namespace _Project.AI.Implementation
         {
             _passiveActions.ForEach(x =>
             {
-                if (x.CanApply(_context, _world))
-                    x.Apply(_context, _world, delta);
+                if (x.CanApply(_context))
+                    x.Apply(_context, delta);
             });
 
             if (_behavior is { Count: > 0 })
+            {
+                RunCurrentAction();                
                 return;
+            }
             
             if (_behavior == null || _behavior.Count == 0)
                 _behavior = CreateBehavior();
@@ -49,42 +49,37 @@ namespace _Project.AI.Implementation
             if (_behavior is { Count: > 0 })
             {
                 LogBehavior();
-                RunCurrentAction();
             }
         }
 
         private void RunCurrentAction()
         {
-            IAction action = _behavior.Peek();
-            action.StartApply(_context, _world);
-            action.OnComplete += RunNextAction;
-            action.Apply(_context, _world);
+            IAction<TContext> action = _behavior.Peek();
+
+            if (action is ILongAction<TContext> longAction
+                && !longAction.IsComplete(_context))
+            {
+                longAction.Execute(_context);
+            }
+            else
+            {
+                action.ApplyResult(_context);
+                _behavior.Dequeue();
+            }
         }
 
-        private void RunNextAction()
+        private Queue<IAction<TContext>> CreateBehavior()
         {
-            IAction action = _behavior.Peek();
-            action.ApplyResult(_context, _world);
-            action.OnComplete -= RunNextAction;
-            _behavior.Dequeue();
-            
-            if (_behavior.Count > 0)
-                RunCurrentAction();
-        }
-
-        private Queue<IAction> CreateBehavior()
-        {
-            IOrderedEnumerable<INeed> needs = _needs
-                .Where(x => x.ShouldWorriedAbout(_context, _world))
-                .OrderByDescending(x => x.Amount(_context, _world));
+            IOrderedEnumerable<INeed<TContext>> needs = _needs
+                .OrderByDescending(x => x.Amount(_context));
 
             if (!needs.Any())
                 return null;
 
-            INeed biggestNeed = needs.First();
+            INeed<TContext> biggestNeed = needs.First();
             List<PossibleBehavior> possibleBehaviors = new()
             {
-                new(biggestNeed, _context.Copy(), _world.Copy()),
+                new(biggestNeed, (TContext)_context.Copy()),
             };
 
             int iterationsCount = 0;
@@ -95,28 +90,17 @@ namespace _Project.AI.Implementation
                 {
                     possibleBehaviors.Remove(behavior);
 
-                    foreach (IAction action in _actions)
+                    foreach (IAction<TContext> action in _actions)
                     {
-                        if (action.CanApply(behavior.Context, behavior.World))
+                        if (action.CanApply(behavior.Context))
                         {
-                            IActorContext context = behavior.Context.Copy();
-                            IWorldContext world = behavior.World.Copy();
-                            
-                            action.StartApply(context, world);
-                            
-                            float applyTime = action.GetApplyTime(context, world);
-                            
-                            _passiveActions.ForEach(x =>
-                            {
-                                if (x.CanApply(context, world))
-                                    x.Apply(context, world, applyTime);
-                            });
-                            
-                            action.ApplyResult(context, world);
-                            Queue<IAction> actionsQueue = new();
+                            TContext context = (TContext)behavior.Context.Copy();
+                            action.ApplyResult(context);
+
+                            Queue<IAction<TContext>> actionsQueue = new();
                             behavior.Actions.ForEach(x => actionsQueue.Enqueue(x));
                             actionsQueue.Enqueue(action);
-                            possibleBehaviors.Add(new(biggestNeed, context, world, actionsQueue));
+                            possibleBehaviors.Add(new(biggestNeed, context, actionsQueue));
                         }
                     }
 
@@ -135,17 +119,15 @@ namespace _Project.AI.Implementation
         }
 
         public IActor Copy() => 
-            new Actor(_actions, _passiveActions, _needs, _world.Copy(), _context.Copy());
+            new Actor<TContext>(_actions, _passiveActions, _needs, (TContext)_context.Copy());
 
         private void LogBehavior() =>
             Debug.Log(new StringBuilder()
                 .AppendLine("New behavior")
-                .AppendLine(Empty)
                 .AppendJoin("\n", _behavior.Select(x => $"{x.GetType().Name}"))
                 .AppendLine(Empty)
                 .AppendLine(_context.ToString())
                 .AppendLine(Empty)
-                .AppendLine(_world.ToString())
                 .ToString());
     }
 }

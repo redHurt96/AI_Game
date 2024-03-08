@@ -4,12 +4,12 @@ using static UnityEngine.Mathf;
 
 namespace _Project.Game.PassiveActions
 {
-    public class SpendEnergy : PassiveAction<NpcContext, WorldContext>
+    public class SpendEnergy : IPassiveAction<NpcContext>
     {
-        protected override bool CanApplyAction(NpcContext context, IWorldContext world) => 
+        public bool CanApply(NpcContext context) => 
             context.IsAwake;
 
-        protected override void ApplyAction(NpcContext context, IWorldContext world, float delta)
+        public void Apply(NpcContext context, float delta)
         {
             float result = Min(context.SpendEnergySpeed * delta, context.Energy.Value);
             context.Energy.Value -= result;

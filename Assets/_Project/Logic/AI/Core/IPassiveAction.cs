@@ -1,8 +1,8 @@
 namespace _Project.AI.Core
 {
-    public interface IPassiveAction
+    public interface IPassiveAction<in TContext> where TContext : IActorContext
     {
-        bool CanApply(IActorContext actor, IWorldContext world);
-        void Apply(IActorContext actor, IWorldContext world, float delta);
+        bool CanApply(TContext context);
+        void Apply(TContext context, float delta);
     }
 }

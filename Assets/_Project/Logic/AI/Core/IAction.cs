@@ -1,14 +1,8 @@
-using System;
-
 namespace _Project.AI.Core
 {
-    public interface IAction
+    public interface IAction<in T> where T : IActorContext
     {
-        event Action OnComplete;
-        bool CanApply(IActorContext context, IWorldContext world);
-        void Apply(IActorContext context, IWorldContext world);
-        void StartApply(IActorContext context, IWorldContext world);
-        float GetApplyTime(IActorContext context, IWorldContext world);
-        void ApplyResult(IActorContext context, IWorldContext world);
+        bool CanApply(T context);
+        void ApplyResult(T context);
     }
 }

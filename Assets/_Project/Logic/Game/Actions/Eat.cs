@@ -1,72 +1,41 @@
-using System;
+using _Project.AI.Core;
 using _Project.Game.Domain;
-using Cysharp.Threading.Tasks;
 using RH_Modules.Utilities.Extensions;
 using static UnityEngine.Mathf;
 using static UnityEngine.Time;
 
 namespace _Project.Game.Actions
 {
-    public class Eat : AI.Core.Action<NpcContext, WorldContext>
+    public class Eat : IAction<NpcContext>, ILongAction<NpcContext>
     {
-        public override event Action OnComplete;
-        
-        protected override bool CanApply(NpcContext context, WorldContext world) => 
-            context.CloseEnoughToFood 
-            && !context.FoodEnergy.Value.ApproximatelyEqual(1f)
-            && context.IsAwake;
+        public bool CanApply(NpcContext context) =>
+            context.CloseEnoughToFood
+            && context.FoodEnergy.Value > .8f;
 
-        protected override void StartApply(NpcContext context, WorldContext world)
+        public bool IsComplete(NpcContext context) => 
+            context.FoodEnergy.Value.ApproximatelyEqual(1f) && context.HasTargetFood;
+
+        public void Execute(NpcContext context)
         {
-            base.StartApply(context, world);
-            context.IsEat = true;
-        }
-
-        protected override async void Apply(NpcContext context, WorldContext world)
-        {
-            while (!context.FoodEnergy.Value.ApproximatelyEqual(1f) && context.HasTargetFood)
-            {
-                float delta = context.EatSpeed * deltaTime;
-                context.FoodEnergy.Value = Min(context.FoodEnergy.Value + delta, 1f);
-                context.TargetFood.FoodEnergy.Value = Max(context.TargetFood.FoodEnergy.Value - delta, 0f);
-
-                await UniTask.Yield();
-            }
-
-            RemoveFood(context, world);
-            OnComplete?.Invoke();
-        }
-
-        protected override float GetApplyTime(NpcContext context, WorldContext world)
-        {
-            float delta = CalculateDelta(context);
-            float time = delta / context.EatSpeed;
+            float delta = context.EatSpeed * deltaTime;
             
-            return time;
+            context.IsEat = true;
+            context.FoodEnergy.Value = Min(context.FoodEnergy.Value + delta, 1f);
         }
 
-        protected override void ApplyResult(NpcContext context, WorldContext world)
+        public void ApplyResult(NpcContext context)
         {
-            float delta = CalculateDelta(context);
-
-            context.FoodEnergy.Value += delta;
-            context.TargetFood.FoodEnergy.Value -= delta;
+            context.FoodEnergy.Value = 1f;
             context.IsEat = false;
             
-            RemoveFood(context, world);
+            RemoveFood(context);
         }
 
-        private static void RemoveFood(NpcContext context, WorldContext world)
+        private static void RemoveFood(NpcContext context)
         {
             context.TargetFood.Destroy();
-            world.Foods.Remove(context.TargetFood);
+            context.WorldFood.Remove(context.TargetFood);
             context.TargetFood = default;
-        }
-
-        private static float CalculateDelta(NpcContext context)
-        {
-            float delta = Min(context.TargetFood.FoodEnergy.Value, 1f - context.FoodEnergy.Value);
-            return delta;
         }
     }
 }

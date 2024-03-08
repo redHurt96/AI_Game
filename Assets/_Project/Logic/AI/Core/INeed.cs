@@ -1,9 +1,8 @@
 namespace _Project.AI.Core
 {
-    public interface INeed
+    public interface INeed<in TContext> where TContext : IActorContext
     {
-        bool ShouldWorriedAbout(IActorContext context, IWorldContext world);
-        float Amount(IActorContext context, IWorldContext world);
-        bool IsAccomplished(IActorContext context, IWorldContext world);
+        float Amount(TContext context);
+        bool IsAccomplished(TContext context);
     }
 }
