@@ -13,7 +13,7 @@ namespace _Project.Game.Domain
         public bool CloseEnoughToFood => HasTargetFood && DistanceToFood < MoveStoppingDistance + .1f;
 
         public bool IsEat { get; set; }
-        public bool IsAwake { get; set; }
+        public bool IsAwake { get; set; } = true;
         public float ChillTimer { get; set; }
 
         public readonly FoodsRepository WorldFood;
@@ -41,9 +41,9 @@ namespace _Project.Game.Domain
         private NpcContext(NpcContext origin)
         {
             WorldFood = origin.WorldFood.Copy();
-            FoodEnergy = origin.FoodEnergy;
-            Energy = origin.Energy;
-            Position = origin.Position;
+            FoodEnergy = new(origin.FoodEnergy.Value);
+            Energy = new(origin.Energy.Value);
+            Position = new(origin.Position.Value);
             TargetFood = origin.TargetFood?.Copy();
         }
 

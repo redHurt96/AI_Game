@@ -9,7 +9,7 @@ namespace _Project.Game.Actions
     public class Sleep : IAction<NpcContext>, ILongAction<NpcContext>
     {
         public bool CanApply(NpcContext context) =>
-            !context.Energy.Value.ApproximatelyEqual(1f)
+            context.Energy.Value < .8f
             && context.IsAwake;
 
         public bool IsComplete(NpcContext context) => 
@@ -17,7 +17,7 @@ namespace _Project.Game.Actions
 
         public void Execute(NpcContext context)
         {
-            context.IsAwake = true;
+            context.IsAwake = false;
             float delta = context.SleepSpeed * deltaTime;
             context.Energy.Value = Min(context.Energy.Value + delta, 1f);
         }

@@ -9,7 +9,7 @@ namespace _Project.Game.Needs
         private const float THRESHOLD = .25f;
         
         public float Amount(NpcContext context) =>
-            context.Energy.Value < 1 - THRESHOLD
+            context.FoodEnergy.Value < 1 - THRESHOLD
                 ? 1f - context.FoodEnergy.Value
                 : 0f;
 

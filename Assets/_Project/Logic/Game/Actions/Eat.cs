@@ -10,7 +10,7 @@ namespace _Project.Game.Actions
     {
         public bool CanApply(NpcContext context) =>
             context.CloseEnoughToFood
-            && context.FoodEnergy.Value > .8f;
+            && context.FoodEnergy.Value < .8f;
 
         public bool IsComplete(NpcContext context) => 
             context.FoodEnergy.Value.ApproximatelyEqual(1f) && context.HasTargetFood;
