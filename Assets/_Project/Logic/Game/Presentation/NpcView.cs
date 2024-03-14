@@ -3,21 +3,21 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace _Project.Presentation
+namespace _Project.Game.Presentation
 {
     public class NpcView : MonoBehaviour
     {
         [SerializeField] private Image _foodBar;
         [SerializeField] private Image _energyBar;
         
-        private NpcContext _npcContext;
+        private Character _character;
 
-        public void Setup(NpcContext npcContext)
+        public void Setup(Character character)
         {
-            _npcContext = npcContext;
-            _npcContext.Position.Subscribe(Move).AddTo(this);
-            _npcContext.Energy.Subscribe(UpdateEnergy).AddTo(this);
-            _npcContext.FoodEnergy.Subscribe(UpdateFood).AddTo(this);
+            _character = character;
+            _character.MoveComponent.PositionChanged.Subscribe(Move).AddTo(this);
+            _character.Energy.Subscribe(UpdateEnergy).AddTo(this);
+            _character.FoodEnergy.Subscribe(UpdateFood).AddTo(this);
         }
 
         private void Move(Vector3 to) => 

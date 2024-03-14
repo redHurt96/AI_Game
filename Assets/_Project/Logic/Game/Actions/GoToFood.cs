@@ -1,33 +1,24 @@
 using _Project.AI.Core;
 using _Project.Game.Domain;
-using UnityEngine;
-using static UnityEngine.Time;
-using static UnityEngine.Vector3;
 
 namespace _Project.Game.Actions
 {
-    public class GoToFood : IAction<NpcContext>, ILongAction<NpcContext>
+    public class GoToFood : IAction<Character>, ILongAction<Character>
     {
-        public bool CanApply(NpcContext context) =>
+        public bool CanApply(Character context) =>
             context.HasTargetFood
             && context.IsAwake;
 
-        public bool IsComplete(NpcContext context) => 
+        public bool IsComplete(Character context) => 
             context.CloseEnoughToFood;
 
-        public void Execute(NpcContext context) =>
-            context.Position.Value = MoveTowards(
-                context.Position.Value,
-                GetTargetPoint(context),
-                context.MoveSpeed * deltaTime);
-
-        public void ApplyResult(NpcContext context) => 
-            context.Position.Value = GetTargetPoint(context);
-
-        private Vector3 GetTargetPoint(NpcContext context)
+        public void Execute(Character context)
         {
-            Vector3 directionFromFoodToPlayer = (context.Position.Value - context.TargetFood.Position).normalized;
-            return context.TargetFood.Position + directionFromFoodToPlayer * context.MoveStoppingDistance;
+            if (context.MoveComponent.Target != context.TargetFood.Position)
+                context.MoveComponent.Move(context.TargetFood.Position);
         }
+
+        public void ApplyResult(Character context) => 
+            context.MoveComponent.Move(context.TargetFood.Position);
     }
 }

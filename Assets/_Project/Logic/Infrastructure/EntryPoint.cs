@@ -1,5 +1,6 @@
 using _Project.AI.Implementation;
 using _Project.Game.Domain;
+using _Project.Game.Presentation;
 using _Project.Presentation;
 using _Project.Services;
 using Zenject;
@@ -11,7 +12,7 @@ namespace _Project.Infrastructure
     {
         private readonly NpcFactory _npcFactory;
         private FoodSpawner _foodSpawner;
-        private (Actor<NpcContext> actor, NpcView view) _actorTuple;
+        private (Actor<Character> actor, NpcView view) _actorTuple;
 
         public EntryPoint(NpcFactory npcFactory) => 
             _npcFactory = npcFactory;

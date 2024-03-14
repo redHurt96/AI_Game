@@ -6,16 +6,16 @@ using static UnityEngine.Time;
 
 namespace _Project.Game.Actions
 {
-    public class Eat : IAction<NpcContext>, ILongAction<NpcContext>
+    public class Eat : IAction<Character>, ILongAction<Character>
     {
-        public bool CanApply(NpcContext context) =>
+        public bool CanApply(Character context) =>
             context.CloseEnoughToFood
             && context.FoodEnergy.Value < .8f;
 
-        public bool IsComplete(NpcContext context) => 
+        public bool IsComplete(Character context) => 
             context.FoodEnergy.Value.ApproximatelyEqual(1f) && context.HasTargetFood;
 
-        public void Execute(NpcContext context)
+        public void Execute(Character context)
         {
             float delta = context.EatSpeed * deltaTime;
             
@@ -23,7 +23,7 @@ namespace _Project.Game.Actions
             context.FoodEnergy.Value = Min(context.FoodEnergy.Value + delta, 1f);
         }
 
-        public void ApplyResult(NpcContext context)
+        public void ApplyResult(Character context)
         {
             context.FoodEnergy.Value = 1f;
             context.IsEat = false;
@@ -31,7 +31,7 @@ namespace _Project.Game.Actions
             RemoveFood(context);
         }
 
-        private static void RemoveFood(NpcContext context)
+        private static void RemoveFood(Character context)
         {
             context.TargetFood.Destroy();
             context.WorldFood.Remove(context.TargetFood);

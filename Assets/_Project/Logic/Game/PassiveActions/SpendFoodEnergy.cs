@@ -4,12 +4,12 @@ using static UnityEngine.Mathf;
 
 namespace _Project.Game.PassiveActions
 {
-    public class SpendFoodEnergy : IPassiveAction<NpcContext>
+    public class SpendFoodEnergy : IPassiveAction<Character>
     {
-        public bool CanApply(NpcContext context) => 
+        public bool CanApply(Character context) => 
             !context.IsEat;
 
-        public void Apply(NpcContext context, float delta)
+        public void Apply(Character context, float delta)
         {
             float result = Min(context.SpendFoodEnergySpeed * delta, context.FoodEnergy.Value);
             context.FoodEnergy.Value -= result;
