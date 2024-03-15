@@ -1,36 +1,39 @@
+using System;
 using _Project.Presentation;
-using RH_Modules.Utilities.Extensions;
-using UnityEngine;
+using UniRx;
 using Zenject;
-using static UnityEngine.Random;
-using static UnityEngine.Time;
+using static System.TimeSpan;
+using static UniRx.Observable;
+using static UnityEngine.Object;
+using static UnityEngine.Resources;
+using Random = UnityEngine.Random;
 
 namespace _Project.Game.Domain
 {
-    public class FoodSpawner : ITickable
+    public class FoodSpawner : IInitializable, IDisposable
     {
         private readonly FoodsRepository _foodsRepository;
-        private float _progress;
-        private readonly float _speed = 1f;
+        private readonly CompositeDisposable _disposable;
+        private readonly float _spawnDelay = 1f;
 
-        public FoodSpawner(FoodsRepository foodsRepository) => 
-            _foodsRepository = foodsRepository;
-
-        public void Tick()
+        public FoodSpawner(FoodsRepository foodsRepository)
         {
-            _progress = Mathf.Min(_progress + _speed * deltaTime, 1f);
-
-            if (_progress.ApproximatelyEqual(1f))
-            {
-                CreateFood();
-                _progress = 0f;
-            }
+            _foodsRepository = foodsRepository;
+            _disposable = new();
         }
+
+        public void Initialize() =>
+            Interval(FromSeconds(_spawnDelay))
+                .Subscribe(x => CreateFood())
+                .AddTo(_disposable);
+
+        public void Dispose() => 
+            _disposable.Dispose();
 
         private void CreateFood()
         {
-            Food food = new(new(Range(-10, 10), 0f, Range(-10, 10)));
-            Object.Instantiate(Resources.Load<FoodView>("Food")).Setup(food);
+            Food food = new(new(Random.Range(-10, 10), 0f, Random.Range(-10, 10)));
+            Instantiate(Load<FoodView>("Food")).Setup(food);
             _foodsRepository.Add(food);
         }
     }

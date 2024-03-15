@@ -33,8 +33,7 @@ namespace _Project.Services
                 context);
 
             view.Setup(context);
-            
-            _charactersRepository.Register(Guid.NewGuid(), actor);
+            _charactersRepository.Register(actor);
         }
     }
 }

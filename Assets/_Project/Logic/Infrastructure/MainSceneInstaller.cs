@@ -9,12 +9,10 @@ namespace _Project.Infrastructure
     {
         public override void InstallBindings()
         {
-            Container.BindInterfacesAndSelfTo<SystemsHandler>().AsSingle();
             Container.Bind<NpcFactory>().AsSingle();
             Container.Bind<FoodsRepository>().AsSingle();
-            Container.Bind<FoodSpawner>().AsSingle();
             Container.Bind<Repository<Actor<Character>>>().AsSingle();
-            
+            Container.BindInterfacesAndSelfTo<FoodSpawner>().AsSingle();
             Container.BindInterfacesAndSelfTo<EntryPoint>().AsSingle().NonLazy();
         }
     }
