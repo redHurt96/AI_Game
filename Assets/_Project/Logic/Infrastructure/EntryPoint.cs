@@ -1,33 +1,32 @@
 using _Project.AI.Implementation;
 using _Project.Game.Domain;
-using _Project.Game.Presentation;
-using _Project.Presentation;
 using _Project.Services;
+using UnityEngine;
 using Zenject;
 using static UnityEngine.Time;
 
 namespace _Project.Infrastructure
 {
-    public class EntryPoint : IInitializable, ITickable
+    public class EntryPoint : ITickable
     {
+        private readonly FoodSpawner _foodSpawner;
         private readonly NpcFactory _npcFactory;
-        private FoodSpawner _foodSpawner;
-        private (Actor<Character> actor, NpcView view) _actorTuple;
+        private readonly Repository<Actor<Character>> _repository;
 
-        public EntryPoint(NpcFactory npcFactory) => 
-            _npcFactory = npcFactory;
-
-        public void Initialize()
+        public EntryPoint(FoodSpawner foodSpawner, NpcFactory npcFactory, Repository<Actor<Character>> repository)
         {
-            FoodsRepository foodsRepository = new(new());
-            _foodSpawner = new(foodsRepository);
-            _actorTuple = _npcFactory.Create(foodsRepository);
+            _foodSpawner = foodSpawner;
+            _npcFactory = npcFactory;
+            _repository = repository;
         }
 
         public void Tick()
         {
             _foodSpawner.Tick();
-            _actorTuple.actor.Act(deltaTime);
+            _repository.ForEach(x => x.Act(deltaTime));
+
+            if (Input.GetKeyDown(KeyCode.Space))
+                _npcFactory.Create();
         } 
     }
 }
