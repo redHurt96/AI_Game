@@ -56,14 +56,18 @@ namespace _Project.AI.Implementation
         {
             IAction<TContext> action = _behavior.Peek();
 
-            if (action is ILongAction<TContext> longAction && !longAction.IsComplete(_context))
+            switch (action)
             {
-                longAction.Execute(_context);
-            }
-            else
-            {
-                action.ApplyResult(_context);
-                _behavior.Dequeue();
+                case IBreakableAction<TContext> breakableAction when breakableAction.NeedToBreak(_context):
+                    _behavior.Clear();
+                    break;
+                case ILongAction<TContext> longAction when !longAction.IsComplete(_context):
+                    longAction.Execute(_context);
+                    break;
+                default:
+                    action.ApplyResult(_context);
+                    _behavior.Dequeue();
+                    break;
             }
         }
 
