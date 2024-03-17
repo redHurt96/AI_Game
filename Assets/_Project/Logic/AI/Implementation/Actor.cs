@@ -5,7 +5,6 @@ using _Project.AI.Core;
 using _Project.AI.Extensions;
 using UnityEngine;
 using static System.String;
-using static UnityEngine.Mathf;
 
 namespace _Project.AI.Implementation
 {
@@ -115,15 +114,11 @@ namespace _Project.AI.Implementation
             return null;
         }
 
-        private INeed<TContext> GetNeed()
-        {
-            if (_needs.All(x => Approximately(x.Amount(_context), 0f)))
-                return null;
-
-            return _needs
+        private INeed<TContext> GetNeed() =>
+            _needs
+                .Where(x => x.Amount(_context) > 0f)
                 .OrderByDescending(x => x.Amount(_context))
                 .FirstOrDefault();
-        }
 
         public IActor Copy() => 
             new Actor<TContext>(_actions, _passiveActions, _needs, (TContext)_context.Copy());
