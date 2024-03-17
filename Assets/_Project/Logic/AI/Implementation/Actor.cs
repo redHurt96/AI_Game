@@ -5,6 +5,7 @@ using _Project.AI.Core;
 using _Project.AI.Extensions;
 using UnityEngine;
 using static System.String;
+using static UnityEngine.Mathf;
 
 namespace _Project.AI.Implementation
 {
@@ -56,8 +57,7 @@ namespace _Project.AI.Implementation
         {
             IAction<TContext> action = _behavior.Peek();
 
-            if (action is ILongAction<TContext> longAction
-                && !longAction.IsComplete(_context))
+            if (action is ILongAction<TContext> longAction && !longAction.IsComplete(_context))
             {
                 longAction.Execute(_context);
             }
@@ -68,15 +68,23 @@ namespace _Project.AI.Implementation
             }
         }
 
-        private Queue<IAction<TContext>> CreateBehavior()
+        private INeed<TContext> GetNeed()
         {
-            IOrderedEnumerable<INeed<TContext>> needs = _needs
-                .OrderByDescending(x => x.Amount(_context));
-
-            if (!needs.Any())
+            if (_needs.All(x => Approximately(x.Amount(_context), 0f)))
                 return null;
 
-            INeed<TContext> biggestNeed = needs.First();
+            return _needs
+                .OrderByDescending(x => x.Amount(_context))
+                .FirstOrDefault();
+        }
+        
+        private Queue<IAction<TContext>> CreateBehavior()
+        {
+            INeed<TContext> biggestNeed = GetNeed();
+
+            if (biggestNeed == null)
+                return null;
+            
             List<PossibleBehavior> possibleBehaviors = new()
             {
                 new(biggestNeed, (TContext)_context.Copy()),

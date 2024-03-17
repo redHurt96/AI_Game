@@ -13,8 +13,7 @@ namespace _Project.Game.Domain
         public Food(Vector3 position) => 
             Position = position;
 
-        public Food Copy() => 
-            new Food(Position);
+        public Food Copy() => new(Position);
 
         public override string ToString() =>
             this.GetFieldsDescription();

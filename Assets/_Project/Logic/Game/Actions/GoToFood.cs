@@ -3,7 +3,7 @@ using _Project.Game.Domain;
 
 namespace _Project.Game.Actions
 {
-    public class GoToFood : IAction<Character>, ILongAction<Character>
+    public class GoToFood : ILongAction<Character>, IAction<Character>
     {
         public bool CanApply(Character context) =>
             context.HasTargetFood
@@ -11,6 +11,9 @@ namespace _Project.Game.Actions
 
         public bool IsComplete(Character context) => 
             context.CloseEnoughToFood;
+
+        public bool CanBreak(Character context) => 
+            !context.HasTargetFood;
 
         public void Execute(Character context)
         {

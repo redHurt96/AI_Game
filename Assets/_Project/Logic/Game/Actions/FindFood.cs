@@ -8,7 +8,10 @@ namespace _Project.Game.Actions
         public bool CanApply(Character context) => 
             context.WorldFood.Any && !context.HasTargetFood;
 
-        public void ApplyResult(Character context) => 
+        public void ApplyResult(Character context)
+        {
             context.TargetFood = context.WorldFood.GetClosest(context.MoveComponent.Position);
+            context.WorldFood.Remove(context.TargetFood);
+        }
     }
 }

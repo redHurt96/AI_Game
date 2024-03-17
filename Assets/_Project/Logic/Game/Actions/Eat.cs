@@ -34,8 +34,7 @@ namespace _Project.Game.Actions
         private static void RemoveFood(Character context)
         {
             context.TargetFood.Destroy();
-            context.WorldFood.Remove(context.TargetFood);
-            context.TargetFood = default;
+            context.TargetFood = null;
         }
     }
 }
