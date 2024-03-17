@@ -68,16 +68,6 @@ namespace _Project.AI.Implementation
             }
         }
 
-        private INeed<TContext> GetNeed()
-        {
-            if (_needs.All(x => Approximately(x.Amount(_context), 0f)))
-                return null;
-
-            return _needs
-                .OrderByDescending(x => x.Amount(_context))
-                .FirstOrDefault();
-        }
-        
         private Queue<IAction<TContext>> CreateBehavior()
         {
             INeed<TContext> biggestNeed = GetNeed();
@@ -111,7 +101,6 @@ namespace _Project.AI.Implementation
                             possibleBehaviors.Add(new(biggestNeed, context, actionsQueue));
                         }
                     }
-
                 }
                 
                 iterationsCount++;
@@ -124,6 +113,16 @@ namespace _Project.AI.Implementation
                 return possibleBehavior.Actions;
             
             return null;
+        }
+
+        private INeed<TContext> GetNeed()
+        {
+            if (_needs.All(x => Approximately(x.Amount(_context), 0f)))
+                return null;
+
+            return _needs
+                .OrderByDescending(x => x.Amount(_context))
+                .FirstOrDefault();
         }
 
         public IActor Copy() => 
