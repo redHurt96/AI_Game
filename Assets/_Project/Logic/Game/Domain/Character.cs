@@ -7,7 +7,7 @@ namespace _Project.Game.Domain
     public class Character : IActorContext
     {
         public bool HasTargetFood => TargetFood != null;
-        public bool CloseEnoughToFood => HasTargetFood && MoveComponent.DistanceTo(TargetFood.Position) < _moveStoppingDistance + .1f;
+        public bool CloseEnoughToFood => HasTargetFood && MoveComponent.DistanceTo(TargetFood.Position) < Config.MoveStoppingDistance + .1f;
         public bool IsEat { get; set; }
         public bool IsAwake { get; set; } = true;
 
@@ -17,20 +17,20 @@ namespace _Project.Game.Domain
         public readonly IMoveComponent MoveComponent;
         public readonly ReactiveProperty<float> FoodEnergy;
         public readonly ReactiveProperty<float> Energy;
+        public readonly CharacterConfig Config;
 
-        public readonly float EatSpeed = .5f;
-        public readonly float SleepSpeed = .5f;
-        public readonly float SpendEnergySpeed = .05f;
-        public readonly float SpendFoodEnergySpeed = .05f;
-        
-        private readonly float _moveStoppingDistance = .5f;
-
-        public Character(float foodEnergy, float energy, FoodsRepository worldFood, IMoveComponent moveComponent)
+        public Character(
+            float foodEnergy, 
+            float energy, 
+            FoodsRepository worldFood, 
+            IMoveComponent moveComponent,
+            CharacterConfig config)
         {
             WorldFood = worldFood;
             MoveComponent = moveComponent;
             FoodEnergy = new(foodEnergy);
             Energy = new(energy);
+            Config = config;
         }
 
         private Character(Character origin)
@@ -40,6 +40,7 @@ namespace _Project.Game.Domain
             Energy = new(origin.Energy.Value);
             TargetFood = origin.TargetFood?.Copy();
             MoveComponent = new MockMoveComponent(origin.MoveComponent);
+            Config = origin.Config;
         }
 
         public IActorContext Copy() =>

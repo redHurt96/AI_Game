@@ -17,7 +17,7 @@ namespace _Project.Game.Actions
 
         public void Execute(Character context)
         {
-            float delta = context.EatSpeed * deltaTime;
+            float delta = context.Config.EatSpeed * deltaTime;
             
             context.IsEat = true;
             context.FoodEnergy.Value = Min(context.FoodEnergy.Value + delta, 1f);

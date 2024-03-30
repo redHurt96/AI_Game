@@ -18,7 +18,7 @@ namespace _Project.Game.Actions
         public void Execute(Character context)
         {
             context.IsAwake = false;
-            float delta = context.SleepSpeed * deltaTime;
+            float delta = context.Config.SleepSpeed * deltaTime;
             context.Energy.Value = Min(context.Energy.Value + delta, 1f);
         }
 

@@ -11,7 +11,7 @@ namespace _Project.Game.PassiveActions
 
         public void Apply(Character context, float delta)
         {
-            float result = Min(context.SpendFoodEnergySpeed * delta, context.FoodEnergy.Value);
+            float result = Min(context.Config.SpendFoodEnergySpeed * delta, context.FoodEnergy.Value);
             context.FoodEnergy.Value -= result;
         }
     }

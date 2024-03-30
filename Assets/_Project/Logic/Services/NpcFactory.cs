@@ -17,18 +17,28 @@ namespace _Project.Services
     {
         private readonly FoodsRepository _foodsRepository;
         private readonly Repository<Actor<Character>> _charactersRepository;
+        private readonly CharacterConfig _characterConfig;
 
-        public NpcFactory(FoodsRepository foodsRepository, Repository<Actor<Character>> charactersRepository)
+        public NpcFactory(
+            FoodsRepository foodsRepository, 
+            Repository<Actor<Character>> charactersRepository,
+            CharacterConfig characterConfig)
         {
             _foodsRepository = foodsRepository;
             _charactersRepository = charactersRepository;
+            _characterConfig = characterConfig;
         }
 
         public void Create()
         {
             Vector3 position = new(Range(-15f, 15f), 0f, Range(-15f, 15f));
             NpcView view = Instantiate(Load<NpcView>("Npc"), position, identity);
-            Character context = new(1f, 1f, _foodsRepository, view.GetComponent<MoveComponent>());
+            Character context = new(
+                1f, 
+                1f, 
+                _foodsRepository, 
+                view.GetComponent<MoveComponent>(), 
+                _characterConfig);
             Actor<Character> actor = new(
                 new() { new Eat(), new Sleep(), new FindFood(), new GoToFood() },
                 new() { new SpendEnergy(), new SpendFoodEnergy() },
