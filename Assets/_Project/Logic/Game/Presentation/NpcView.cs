@@ -1,3 +1,4 @@
+using _Project.AI.Implementation;
 using _Project.Game.Domain;
 using UniRx;
 using UnityEngine;
@@ -9,12 +10,14 @@ namespace _Project.Game.Presentation
     {
         [SerializeField] private Image _foodBar;
         [SerializeField] private Image _energyBar;
+        [SerializeField] private ActorPlanView _planView;
         
         private Character _character;
 
-        public void Setup(Character character)
+        public void Setup(Character character, Actor<Character> actor)
         {
             _character = character;
+            _planView.Setup(actor);
             _character.MoveComponent.PositionChanged.Subscribe(Move).AddTo(this);
             _character.Energy.Subscribe(UpdateEnergy).AddTo(this);
             _character.FoodEnergy.Subscribe(UpdateFood).AddTo(this);

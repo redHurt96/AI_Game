@@ -3,13 +3,15 @@ using System.Linq;
 using System.Text;
 using _Project.AI.Core;
 using _Project.AI.Extensions;
-using UnityEngine;
 using static System.String;
 
 namespace _Project.AI.Implementation
 {
-    public partial class Actor<TContext> : IActor where TContext : IActorContext
+    public partial class Actor<TContext> : IActor, IActorView
+        where TContext : IActorContext
     {
+        public IEnumerable<string> Behavior => _behavior?.Select(x => x.GetType().Name);
+
         private Queue<IAction<TContext>> _behavior = new();
         
         private readonly List<IAction<TContext>> _actions;
@@ -128,7 +130,7 @@ namespace _Project.AI.Implementation
             new Actor<TContext>(_actions, _passiveActions, _needs, (TContext)_context.Copy());
 
         private void LogBehavior() =>
-            Debug.Log(new StringBuilder()
+            UnityEngine.Debug.Log(new StringBuilder()
                 .AppendLine("New behavior")
                 .AppendJoin("\n", _behavior.Select(x => $"{x.GetType().Name}"))
                 .AppendLine(Empty)

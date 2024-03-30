@@ -35,7 +35,7 @@ namespace _Project.Services
                 new() { new Energy(), new Hunger(), new WasteTime() },
                 context);
 
-            view.Setup(context);
+            view.Setup(context, actor);
             _charactersRepository.Register(actor);
         }
     }
