@@ -48,10 +48,8 @@ namespace _Project.AI.Implementation
             if (_behavior == null || _behavior.Count == 0)
                 _behavior = CreateBehavior();
 
-            if (_behavior is { Count: > 0 })
-            {
-                LogBehavior();
-            }
+            // if (_behavior is { Count: > 0 })
+            //     LogBehavior();
         }
 
         private void RunCurrentAction()
